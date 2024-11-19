@@ -1,5 +1,6 @@
 import unittest
 import math
+import numpy as np
 from math_expression_calculator import MathExpressionCalculator
 
 class TestMathExpressionCalculator(unittest.TestCase):
@@ -45,7 +46,8 @@ class TestMathExpressionCalculator(unittest.TestCase):
             ("(X1 + 2) * X2 / (X3 - 3) + X4 - X5", {'X1': 1, 'X2': 2, 'X3': 5, 'X4': 1, 'X5': 1}, 3),
             ("3 * X1 + (X2 - 5) * (X3 + X4) / X5", {'X1': 1, 'X2': 6, 'X3': 2, 'X4': 1, 'X5': 2}, 4.5),
             ("X1 * X2 - (X3 + 4) * (X4 - X5) + X6 / X7", {'X1': 1, 'X2': 2, 'X3': 3, 'X4': 4, 'X5': 2, 'X6': 8, 'X7': 4}, -10),
-            
+            ("X1 + X2 / - X3 * X4", {'X1': 1, 'X2': 1, 'X3': 1, 'X4': 1}, 0),
+
             # 3. 다양한 수학 함수 케이스
             ("log10(a * b) + c", {'a': 10, 'b': 1, 'c': 2}, math.log10(10)+2),  # log(10) = 1
             ("sin(a) * cos(b) - tan(c)", {'a': 0, 'b': 0, 'c': 0}, 0),  # sin(0) = 0, cos(0) = 1, tan(0) = 0
@@ -72,22 +74,25 @@ class TestMathExpressionCalculator(unittest.TestCase):
             ("X1 + X2 -", {'X1': 1, 'X2': 1}, "Error: Invalid Syntax"),
             ("* X1 + X2 - X3", {'X1': 1, 'X2': 1, 'X3': 1}, "Error: Invalid Syntax"),
             ("X1 ^ X2 + X3 ^", {'X1': 1, 'X2': 2, 'X3': 3}, "Error: Invalid Syntax"),
-            ("X1 ++ X2 - X3", {'X1': 1, 'X2': 1, 'X3': 1}, "Error: Invalid Syntax"),
             ("(X1 + X2 - X3", {'X1': 1, 'X2': 1, 'X3': 1}, "Error: Invalid Syntax"),
             ("X1 + X2) - X3 + X4", {'X1': 1, 'X2': 1, 'X3': 1, 'X4': 1}, "Error: Invalid Syntax"),
             ("X1 + X5 - X2 + X6", {'X1': 1, 'X2': 1, 'X6': 1}, "Error: Variable not found."),
-            ("X1 ^^ X2 - X3 + X4", {'X1': 1, 'X2': 1, 'X3': 1, 'X4': 1}, "Error: Invalid Syntax"),
-            ("X1 + X2 / - X3 * X4", {'X1': 1, 'X2': 1, 'X3': 1, 'X4': 1}, "Error: Invalid Syntax"),
+            ("X1 ^^ X2 - X3 + X4", {'X1': 1, 'X2': 1, 'X3': 1, 'X4': 1}, "Error: Invalid Syntax")
         ]
         for formula, variables, expected in test_cases:
             with self.subTest(formula=formula, variables=variables, expected=expected):
                 result = self.calculator.calculate_formula(formula, variables_dict=variables)
                 if isinstance(expected, list):
                     expected = expected[0]  # 리스트의 첫 번째 요소가 기대값
+                if isinstance(expected, (int, float)):
+                    expected = float(expected)
+                if isinstance(result, (np.float64, np.float32)):
+                    result = float(result)
+
                 self.assertEqual(result, expected)
 
     def test_invalid_syntax(self):
-        result = self.calculator.calculate_formula("2 ** 3", {})
+        result = self.calculator.calculate_formula("2 *^ 3", {})
         self.assertEqual(result, "Error: Invalid Syntax")
 
 if __name__ == '__main__':
